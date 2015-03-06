@@ -41,3 +41,18 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# baby ide bin obj
+SharpDCIIDE/bin/
+SharpDCIIDE/obj/
+SharpDCIIDE.Test/bin/
+SharpDCIIDE.Test/obj/
+
+# sou
+*.suo
+*.csproj.user
+*.dotSettings.user
+
+# ide
+SharpDCIIDE.sln.ide/
+UpgradeLog.htm

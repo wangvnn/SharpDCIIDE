@@ -1,0 +1,95 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using KimHaiQuang.SharpDCIIDE.Domain.Data.DCIInfo;
+using KimHaiQuang.SharpDCIIDE.Domain.Data.Settings;
+using KimHaiQuang.SharpDCIIDE.Domain.Operation;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
+
+namespace KimHaiQuang.SharpDCIIDE.Presentation.Operation
+{
+    public class ContextFileOpeningContext
+    {
+        #region Usecase
+        // Use case: View CONTEXT FILE
+        // Primary Actor: USER
+        // Precondition: Valid CONTEXT FILE
+        // Postcondition: EDITOR displays CONTEXT INFO
+        // Trigger: USER wants to view CONTEXT FILE
+        //
+        // Steps:
+        // 1) User selects CONTEXT FILE to open it in EDITOR
+        // 2) SOLUTION EXPLORER finds SELECTED CONTEXT FILE
+        // 3) CONTEXT FILE PARSER parses CONTEXT FILE to get CONTEXT MODEL (Sub: Parse CONTEXT FILE)
+        // 4) CONTEXT FILE EDITOR displays CONTEXT MODEL 
+        #endregion
+
+        #region Roles
+
+        private ISolutionExplorerRole SolutionExplorer { get; set; }
+        public interface ISolutionExplorerRole
+        {
+            string GetSelectedItemFullPath();
+        }
+        private IContextFileParserRole Parser { get; set; }
+        public interface IContextFileParserRole
+        {
+            DCIContext Parse(string filePath);
+        }
+
+        private IContextFileEditorRole Editor { get; set; }
+        public interface IContextFileEditorRole
+        {
+            void Display(DCIContext contextModel);
+        }
+
+        #endregion
+
+        #region Context
+
+        public ContextFileOpeningContext(ISolutionExplorerRole explorer,
+            BabyIDESettings settings,
+            IContextFileEditorRole editor)
+        {
+            SolutionExplorer = explorer;
+
+            Parser = new ContextFileParsingContext(settings);
+            Editor = editor;
+        }
+
+        public void Open()
+        {
+            SolutionExplorer_FindSelectedContextFile();
+        }
+
+        #endregion
+
+        #region SolutionExplorer_Methods
+
+        void SolutionExplorer_FindSelectedContextFile()
+        {
+            string filePath = SolutionExplorer.GetSelectedItemFullPath();
+
+            if (File.Exists(filePath))
+            {
+                Parser_ParseContextFile(filePath);
+            }
+        }
+
+        #endregion
+
+        #region Parser_Methods
+        private void Parser_ParseContextFile(string filePath)
+        {
+            var contextModel = Parser.Parse(filePath);
+            Editor.Display(contextModel);
+        }
+        #endregion
+    }
+}
