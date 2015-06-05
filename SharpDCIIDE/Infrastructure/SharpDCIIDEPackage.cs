@@ -171,7 +171,7 @@ namespace KimHaiQuang.SharpDCIIDE
                 var transformFileInfo = new FileInfo(itemFullPath);
 
                 // then check if the file is named 'web.config'
-                bool isWebConfig = transformFileInfo.Extension.Contains("cs");
+                bool isWebConfig = transformFileInfo.Extension.Contains("cs") || transformFileInfo.Extension.Contains("zen");
                 // if not leave the menu hidden
                 if (!isWebConfig) return;
 

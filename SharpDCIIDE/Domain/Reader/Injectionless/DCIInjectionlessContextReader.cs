@@ -34,7 +34,7 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
 
         #region Roles
 
-         private DCIContext ContextFileModel { get; set; }
+        private DCIContext ContextFileModel { get; set; }
 
         private List<RegionNodes> RegionReader { get; set; }
 
@@ -78,7 +78,8 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
             }
             using (var file = File.OpenText(filePath))
             {
-                var tree = CSharpSyntaxTree.ParseText(file.ReadToEnd());
+                var sourceCode = file.ReadToEnd();
+                var tree = CSharpSyntaxTree.ParseText(sourceCode);
                 var root = tree.GetRoot();
                 if (root != null)
                 {
@@ -142,6 +143,7 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
                 {
                     contextRole = new DCIRole();
                     contextRole.Name = parentNode.Identifier.ToString();
+                    contextRole.CodeSpan = new Span(contextRegion.RegionSpan.Start, contextRegion.RegionSpan.Length);
                     ContextFileModel.AddRole(contextRole);
                 }
 

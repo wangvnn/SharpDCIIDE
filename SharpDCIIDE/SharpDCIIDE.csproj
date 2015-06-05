@@ -203,6 +203,7 @@
     <Compile Include="Domain\Data\Settings\BabyIDESettings.cs" />
     <Compile Include="Domain\Operation\ContextFileParsingContext.cs" />
     <Compile Include="Domain\Reader\Injectionless\DCIInjectionlessContextReader.cs" />
+    <Compile Include="Domain\Reader\Injectionless\Zen2Cs.cs" />
     <Compile Include="Domain\Reader\Marvin\DCIMarvinContextReader.cs" />
     <Compile Include="Infrastructure\Services\EditorService.cs" />
     <Compile Include="Infrastructure\Services\ProjectSelectionService.cs" />

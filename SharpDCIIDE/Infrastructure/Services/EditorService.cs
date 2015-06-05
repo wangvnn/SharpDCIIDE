@@ -189,10 +189,17 @@ namespace KimHaiQuang.SharpDCIIDE.Infrastructure.Services
             {
                 int start = (int)dataModel.DataBuffer.Properties.GetProperty("StartPosition");
                 int end = (int)dataModel.DataBuffer.Properties.GetProperty("EndPosition");
-                Span block = new Span(start, end-start);
-                int leadingCharCount = this.CalculateLeadingWhitespace(dataModel.DataBuffer, block);
-                char leadingCharacter = this.GetLeadingCharacter(dataModel.DataBuffer, block);
-                return new DCIBabyIDETextViewModel(dataModel, this.CreateElisionBuffer(dataModel, start, end, leadingCharCount), leadingCharCount, leadingCharacter);
+                if (start < end)
+                {
+                    Span block = new Span(start, end - start);
+                    int leadingCharCount = this.CalculateLeadingWhitespace(dataModel.DataBuffer, block);
+                    char leadingCharacter = this.GetLeadingCharacter(dataModel.DataBuffer, block);
+                    return new DCIBabyIDETextViewModel(dataModel, this.CreateElisionBuffer(dataModel, start, end, leadingCharCount), leadingCharCount, leadingCharacter);
+                }
+                else
+                {
+                    return new DCIBabyIDETextViewModel(dataModel, this.CreateElisionBuffer(dataModel, 0, 1, ' '), 0, ' ');
+                }                
             }
 
             // Methods
