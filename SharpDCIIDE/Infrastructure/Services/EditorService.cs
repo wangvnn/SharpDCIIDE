@@ -98,6 +98,9 @@ namespace KimHaiQuang.SharpDCIIDE.Infrastructure.Services
 
             IVsTextLines objectForIUnknown = (IVsTextLines)Marshal.GetObjectForIUnknown(zero);
 
+            Guid CSharpLanguageServiceId = new Guid("694DD9B6-B865-4C5B-AD85-86356E9C88DC");
+            objectForIUnknown.SetLanguageServiceID(CSharpLanguageServiceId);
+
             IVsCodeWindow window = EditorAdaptersFactoryService.CreateVsCodeWindowAdapter(OLEServiceProvider);
             ErrorHandler.ThrowOnFailure(window.SetBuffer(objectForIUnknown));
 
@@ -116,6 +119,7 @@ namespace KimHaiQuang.SharpDCIIDE.Infrastructure.Services
             ((IVsUserData)window).SetData(ref riidKey, TextEditorFactoryService.CreateTextViewRoleSet(roles).ToString());
 
             IVsTextBuffer bufferAdapter = objectForIUnknown;
+            
             ITextBuffer dataBuffer = EditorAdaptersFactoryService.GetDataBuffer(bufferAdapter);
 
             if (dataBuffer.Properties.ContainsProperty("StartPosition"))
@@ -129,9 +133,9 @@ namespace KimHaiQuang.SharpDCIIDE.Infrastructure.Services
 
             dataBuffer.Properties.AddProperty("StartPosition", start);
             dataBuffer.Properties.AddProperty("EndPosition", start + length);
-
+            
             var testHost = EditorService.EditorAdaptersFactoryService.GetWpfTextViewHost(view);
-
+            
             if (isReadonly)
             {
                 testHost.TextView.Options.SetOptionValue(DefaultTextViewOptions.ViewProhibitUserInputName, true);
@@ -158,7 +162,7 @@ namespace KimHaiQuang.SharpDCIIDE.Infrastructure.Services
 
                 RunningDocumentTable.FindAndLockDocument((uint)_VSRDTFLAGS.RDT_ReadLock, filePath, 
                     out hierarchy, out itemID, out docData, out _docCookie);
-
+                
                 ErrorHandler.ThrowOnFailure(InvisibleEditorManager.RegisterInvisibleEditor(filePath, null, 1, null, out editor));
                 _CurrentInvisibleEditor = editor;
             }
