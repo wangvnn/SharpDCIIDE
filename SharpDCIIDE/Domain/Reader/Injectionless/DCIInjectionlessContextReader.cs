@@ -193,16 +193,32 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
             {
                 foreach (var node in roleRegion.Nodes)
                 {
-                    if (node.IsKind(SyntaxKind.PropertyDeclaration) &&
-                        parentNode == node.Parent)
+                    if (parentNode == node.Parent )
                     {
-                        var roleNode = node as PropertyDeclarationSyntax;
-                        var roleTypeNode = (roleNode.Type as IdentifierNameSyntax);
-                        var roleNodeTypeName = roleTypeNode != null ? roleTypeNode.Identifier.ToString() : "";
+                        var roleNodeTypeName = "";
+                        var newRoleName = "";
+                        
+                        if (node.IsKind(SyntaxKind.PropertyDeclaration))
+                        {
+                            var roleNode = node as PropertyDeclarationSyntax;
+
+                            var roleTypeNode = (roleNode.Type as IdentifierNameSyntax);
+                            roleNodeTypeName = roleTypeNode != null ? roleTypeNode.Identifier.ToString() : "";
+                            newRoleName = roleNode.Identifier.ToString();
+
+                        }
+                        else if  (node.IsKind(SyntaxKind.FieldDeclaration))
+                        {
+                            var roleNode = node as FieldDeclarationSyntax;
+                            var roleTypeNode = (roleNode.Declaration.Type as IdentifierNameSyntax);
+
+                            roleNodeTypeName = roleTypeNode != null ? roleTypeNode.Identifier.ToString() : "";
+                            newRoleName = roleNode.Declaration.Variables[0].Identifier.ToString();                            
+                        }
 
                         var newRole = new DCIRole();
-                        newRole.Name = roleNode.Identifier.ToString();
-                        newRole.CodeSpan = new Span(roleNode.Span.Start, roleNode.Span.Length);
+                        newRole.Name = newRoleName;
+                        newRole.CodeSpan = new Span(node.Span.Start, node.Span.Length);
                         ContextFileModel.AddRole(newRole);
 
                         RoleReader_ReadInterface(newRole, roleRegion, roleNodeTypeName, parentNode);
@@ -306,16 +322,16 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
         }
         private void InteractionReader_FindInteraction(DCIRole role1, SyntaxNode node)
         {
-            var role2 = InteractionReader_FindTargetRole(role1, node.ToString());
+            List<DCIRole> role2List = new List<DCIRole>();
+            InteractionReader_FindTargetRole(role1, node.ToString(), ref role2List);
 
-            if (role2 == null)
+            var assignement = node as AssignmentExpressionSyntax;
+            if (assignement != null)
             {
-                var assignement = node as AssignmentExpressionSyntax;
-                if (assignement != null)
-                    role2 = InteractionReader_FindTargetRole(role1, assignement.Right.ToString(), true);
+                InteractionReader_FindTargetRole(role1, assignement.Right.ToString(), ref role2List, true);
             }
 
-            if (role2 != null)
+            foreach (var role2 in role2List)
             {
                 var interaction = new DCIInteraction();
                 interaction.Source = role1;
@@ -325,7 +341,7 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
             }
         }
 
-        private DCIRole InteractionReader_FindTargetRole(DCIRole role1, string expression, bool checkSameName=false)
+        private void  InteractionReader_FindTargetRole(DCIRole role1, string expression, ref List<DCIRole> roles, bool checkSameName=false)
         {
             for (int j = 0; j < ContextFileModel.Roles.Values.Count; ++j)
             {
@@ -337,11 +353,10 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
                         expression.Contains(role2.Name + ".") ||
                         (expression.Contains(role2.Name) && checkSameName))
                     {
-                        return role2;
+                        roles.Add(role2);
                     }
                 }
-            }
-            return null;
+            }            
         }
 
 

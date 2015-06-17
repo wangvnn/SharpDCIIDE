@@ -85,8 +85,8 @@ namespace KimHaiQuang.SharpDCIIDE.Presentation.ViewModel
 
             foreach (var interaction in Model.Interactions)
             {
-                var source = Roles.FirstOrDefault(r => r.Model == interaction.Value.Source);
-                var target = Roles.FirstOrDefault(r => r.Model == interaction.Value.Target);
+                var source = Roles.FirstOrDefault(r => r.Model == interaction.Source);
+                var target = Roles.FirstOrDefault(r => r.Model == interaction.Target);
                 _Graph.AddEdge(new Edge<RoleViewModel>(source, target));
             }
         }
