@@ -11,6 +11,7 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
         public static void Transform(ref string sourceCode)
         {
             sourceCode = sourceCode.Replace("* ", " ");
+            sourceCode = sourceCode.Replace("implements ", ": ");
             sourceCode = sourceCode.Replace("*)", ")");
         }
     }

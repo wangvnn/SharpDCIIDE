@@ -231,8 +231,7 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
 
         private void RoleReader_ReadMethods(DCIRole role, ClassDeclarationSyntax parentNode)
         {
-            foreach (var roleMethodRegion in RegionReader.Where(r => r.RegionName.Contains("_Methods") &&
-                                                                        r.RegionName.Contains(role.Name)))
+            foreach (var roleMethodRegion in RegionReader.Where(r => r.RegionName.Contains(role.Name+"_Methods")))
             {
                 foreach (var node in roleMethodRegion.Nodes)
                 {
@@ -309,8 +308,7 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
             {
                 var role1 = ContextFileModel.Roles.Values.ElementAt(i);
 
-                foreach (var roleMethodRegion in RegionReader.Where(r => r.RegionName.Contains("_Methods") &&
-                                                                        r.RegionName.Contains(role1.Name)))
+                foreach (var roleMethodRegion in RegionReader.Where(r => r.RegionName.Contains(role1.Name+"_Methods")))
                 {
                     foreach (var node in roleMethodRegion.Nodes)
                     {
