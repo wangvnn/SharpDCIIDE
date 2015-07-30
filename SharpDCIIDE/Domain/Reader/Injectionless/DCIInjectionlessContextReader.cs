@@ -231,7 +231,7 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
 
         private void RoleReader_ReadMethods(DCIRole role, ClassDeclarationSyntax parentNode)
         {
-            foreach (var roleMethodRegion in RegionReader.Where(r => r.RegionName.Contains(role.Name+"_Methods")))
+            foreach (var roleMethodRegion in RegionReader.Where(r => r.RegionName.Contains(" "+role.Name+"_Methods")))
             {
                 foreach (var node in roleMethodRegion.Nodes)
                 {
@@ -308,7 +308,7 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
             {
                 var role1 = ContextFileModel.Roles.Values.ElementAt(i);
 
-                foreach (var roleMethodRegion in RegionReader.Where(r => r.RegionName.Contains(role1.Name+"_Methods")))
+                foreach (var roleMethodRegion in RegionReader.Where(r => r.RegionName.Contains(" " + role1.Name+"_Methods")))
                 {
                     foreach (var node in roleMethodRegion.Nodes)
                     {
@@ -347,16 +347,68 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
 
                 if (role1 != role2)
                 {
-                    if (expression.Contains(role2.Name + "_") ||
-                        expression.Contains(role2.Name + ".") ||
-                        (expression.Contains(role2.Name) && checkSameName))
+                    bool callingRoleMethod = expression.Contains(" " + role2.Name + "_");
+                    bool callingDataMethod = expression.Contains(" " + role2.Name + ".") ||                        
+                                             expression.Contains("(" + role2.Name + ".");
+
+                    bool assignment = (expression.Contains(" " + role2.Name) && checkSameName);
+
+                    bool usedAsParams = expression.Contains("(" + role2.Name + ")") ||
+                                        expression.Contains("(" + role2.Name + ", ") ||
+                                        expression.Contains(", " + role2.Name + ",") ||
+                                        expression.Contains(", " + role2.Name + ")");
+
+                    // Calling
+                    if ( callingRoleMethod ||callingDataMethod || assignment || usedAsParams)
                     {
                         roles.Add(role2);
+
+                        if (callingDataMethod)
+                        {
+                            InteractionReader_AddRoleMethods(role2, expression);
+                        }
                     }
                 }
             }            
         }
+        void InteractionReader_AddRoleMethods(DCIRole role, string expression)
+        {
+            for (int nameStart = 0; nameStart < expression.Length; ++nameStart)
+            {
+                var nameEnd = nameStart + role.Name.Length + 1;
 
+                if (nameEnd < expression.Length && expression[nameStart + 1] != ' ' &&
+                    (expression[nameStart + 1] != ' ' || expression[nameStart + 1] != '('))
+                {
+                    string name = expression.Substring(nameStart+1, nameEnd - nameStart);
+
+                    if (name.ToLower().Equals(role.Name.ToLower()+"."))
+                    {
+                        var methodStart = nameStart + role.Name.Length + 2;
+
+                        string[] endChar = {" ", ";", "(", ".", ")", ",", "/", "+", "*" };
+
+                        var methodEnd = expression.Length;
+                        for (int k = 0; k < endChar.Length; ++k)
+                        {
+                            var me = expression.IndexOf(endChar[k], methodStart);
+                            me = me < 0 ? expression.Length : me;
+                            methodEnd = Math.Min(methodEnd, me);
+                         }
+
+                        if (methodEnd >= 0 && methodEnd < expression.Length)
+                        {
+                            var methodName = expression.Substring(methodStart, methodEnd - methodStart);
+                            methodName = Char.ToLower(methodName[0]) + methodName.Substring(1);
+                            var roleMethod = new DCIRoleMethod();
+                            roleMethod.Name = methodName;                            
+                            roleMethod.CodeSpan = role.CodeSpan;
+                            role.AddMethod(roleMethod);                            
+                        }
+                    }
+                }
+            }
+        }
 
         private void InteractionReader_ReadInteractions(ClassDeclarationSyntax parentNode)
         {
