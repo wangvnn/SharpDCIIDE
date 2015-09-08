@@ -24,6 +24,7 @@ namespace KimHaiQuang.SharpDCIIDE.Presentation.ViewModel
         public void UnRegisterRoutedCommandHandlers()
         {
             base.UnregisterCommand(RoleViewModelRoutedCommands.SelectCode);
+            base.UnregisterCommand(RoleViewModelRoutedCommands.ToggleInterfaceView);
         }
 
         private void RegisterRoutedCommandHandlers()
@@ -32,12 +33,25 @@ namespace KimHaiQuang.SharpDCIIDE.Presentation.ViewModel
                             RoleViewModelRoutedCommands.SelectCode,
                             param => { return true; },
                             param => this.SelectCode(param as SpanObject));
+
+            base.RegisterCommand(
+                            RoleViewModelRoutedCommands.ToggleInterfaceView,
+                            param => { return true; },
+                            param => this.ToggleInterfaceView(param as RoleViewModel));
         }
 
         private void SelectCode(SpanObject codeSpan)
         {
             if (codeSpan != null && ChangeCodeSpanRequest != null)
                 ChangeCodeSpanRequest(codeSpan, EventArgs.Empty);
+        }
+
+        private void ToggleInterfaceView(RoleViewModel roleVM)
+        {
+            if (roleVM != null)
+            {
+                roleVM.ToggleInterfaceView();
+            }
         }
 
         private ObservableCollection<RoleViewModel> _Roles = new ObservableCollection<RoleViewModel>();

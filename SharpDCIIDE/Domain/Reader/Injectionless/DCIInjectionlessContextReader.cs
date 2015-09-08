@@ -349,14 +349,19 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
                 {
                     bool callingRoleMethod = expression.Contains(" " + role2.Name + "_");
                     bool callingDataMethod = expression.Contains(" " + role2.Name + ".") ||                        
-                                             expression.Contains("(" + role2.Name + ".");
+                                             expression.Contains("(" + role2.Name + ".") ||
+                                             expression.Contains("!" + role2.Name + ".");
 
                     bool assignment = (expression.Contains(" " + role2.Name) && checkSameName);
 
                     bool usedAsParams = expression.Contains("(" + role2.Name + ")") ||
                                         expression.Contains("(" + role2.Name + ", ") ||
                                         expression.Contains(", " + role2.Name + ",") ||
-                                        expression.Contains(", " + role2.Name + ")");
+                                        expression.Contains(", " + role2.Name + ")") ||
+                                        expression.Contains("(!" + role2.Name + ")") ||
+                                        expression.Contains("(!" + role2.Name + ", ") ||
+                                        expression.Contains(", !" + role2.Name + ",") ||
+                                        expression.Contains(", !" + role2.Name + ")");
 
                     // Calling
                     if ( callingRoleMethod ||callingDataMethod || assignment || usedAsParams)
@@ -365,14 +370,21 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
 
                         if (callingDataMethod)
                         {
-                            InteractionReader_AddRoleMethods(role2, expression);
+                            InteractionReader_AddRoleMethods(ref role2, expression);
                         }
                     }
                 }
             }            
         }
-        void InteractionReader_AddRoleMethods(DCIRole role, string expression)
+        void InteractionReader_AddRoleMethods(ref DCIRole role, string expression)
         {
+            if (role.Interface == null)
+            {
+                var newInterface = new DCIRoleInterface();
+                newInterface.Name = "methods";
+                role.Interface = newInterface;
+            }
+
             for (int nameStart = 0; nameStart < expression.Length; ++nameStart)
             {
                 var nameEnd = nameStart + role.Name.Length + 1;
@@ -400,10 +412,12 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
                         {
                             var methodName = expression.Substring(methodStart, methodEnd - methodStart);
                             methodName = Char.ToLower(methodName[0]) + methodName.Substring(1);
-                            var roleMethod = new DCIRoleMethod();
-                            roleMethod.Name = methodName;                            
-                            roleMethod.CodeSpan = role.CodeSpan;
-                            role.AddMethod(roleMethod);                            
+
+                            var newInterfaceSignature = new DCIInterfaceSignature();
+                            newInterfaceSignature.Name = methodName;
+                            newInterfaceSignature.CodeSpan = role.CodeSpan;
+
+                            role.Interface.AddSignature(newInterfaceSignature);
                         }
                     }
                 }

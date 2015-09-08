@@ -18,6 +18,7 @@
     
     <UserControl.CommandBindings>
         <viewModelBase:CommandSinkBinding Command="viewmodel:RoleViewModelRoutedCommands.SelectCode" />
+        <viewModelBase:CommandSinkBinding Command="viewmodel:RoleViewModelRoutedCommands.ToggleInterfaceView" />
     </UserControl.CommandBindings>
 
     <UserControl.Resources>
