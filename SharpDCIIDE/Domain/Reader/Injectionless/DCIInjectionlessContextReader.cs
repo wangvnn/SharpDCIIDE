@@ -215,14 +215,17 @@ namespace KimHaiQuang.SharpDCIIDE.Domain.Reader.Injectionless
                             roleNodeTypeName = roleTypeNode != null ? roleTypeNode.Identifier.ToString() : "";
                             newRoleName = roleNode.Declaration.Variables[0].Identifier.ToString();                            
                         }
+                       
+                        if (!String.IsNullOrEmpty(newRoleName))
+                        {
+                            var newRole = new DCIRole();
+                            newRole.Name = newRoleName;
+                            newRole.CodeSpan = new Span(node.Span.Start, node.Span.Length);
+                            ContextFileModel.AddRole(newRole);
 
-                        var newRole = new DCIRole();
-                        newRole.Name = newRoleName;
-                        newRole.CodeSpan = new Span(node.Span.Start, node.Span.Length);
-                        ContextFileModel.AddRole(newRole);
-
-                        RoleReader_ReadInterface(newRole, roleRegion, roleNodeTypeName, parentNode);
-                        RoleReader_ReadMethods(newRole, parentNode);
+                            RoleReader_ReadInterface(newRole, roleRegion, roleNodeTypeName, parentNode);
+                            RoleReader_ReadMethods(newRole, parentNode);
+                        }
                     }
                 }
             }
